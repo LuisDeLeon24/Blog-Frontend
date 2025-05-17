@@ -37,7 +37,7 @@ const LandingPage = () => {
                 <GridItem>
                     <Box bg="green.100" p={4} borderRadius="md">
                     <strong>Columna secundaria (1/3)</strong><br />
-                    Ideal para un sidebar, widgets, enlaces o anuncios.
+                    Se vienen cositas.
                     </Box>
                 </GridItem>
             </Grid>

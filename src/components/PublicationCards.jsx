@@ -1,30 +1,34 @@
 import React, { useState } from "react";
 import {
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  Image,
-  Text,
-  VStack,
-  HStack,
+  Box, Button, Flex, IconButton, Image, Text, VStack, HStack
 } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart, FaComment } from "react-icons/fa";
 
-const PublicationCard = ({ publication }) => {
+const PublicationCard = ({ publication, onClick }) => {
   if (!publication) return null;
 
-  const { title, description, photos = [], comments = [] } = publication;
+  const { _id, title, description, photos = [], comments = [] } = publication;
 
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(false);
 
-  const nextImage = () => {
+  const hasPhotos = photos.length > 0;
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    if (!hasPhotos) return;
     setCurrentImage((prev) => (prev + 1) % photos.length);
   };
 
-  const prevImage = () => {
+  const prevImage = (e) => {
+    e.stopPropagation();
+    if (!hasPhotos) return;
     setCurrentImage((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  const toggleLike = (e) => {
+    e.stopPropagation();
+    setLiked((prev) => !prev);
   };
 
   return (
@@ -33,14 +37,15 @@ const PublicationCard = ({ publication }) => {
       borderRadius="lg"
       overflow="hidden"
       p={6}
-      maxW="100%"           // Aumenté el ancho máximo
+      maxW="100%"
       boxShadow="lg"
       bg="white"
+      cursor="pointer"
+      onClick={onClick}
     >
-      <Flex gap={6} align="center">
-        {/* Carrusel de imágenes */}
-        <Box w="50%" position="relative">
-          {photos.length > 0 && (
+      <Flex direction="column" gap={6}>
+        <Box position="relative" width="100%" height="450px">
+          {hasPhotos ? (
             <>
               <Image
                 src={photos[currentImage]}
@@ -48,15 +53,17 @@ const PublicationCard = ({ publication }) => {
                 borderRadius="md"
                 objectFit="cover"
                 w="100%"
-                h="250px"          // Imagen más alta
+                h="100%"
               />
               <Button
-                size="md"          // Botones más grandes
+                size="md"
                 position="absolute"
                 top="50%"
                 left="10px"
                 transform="translateY(-50%)"
                 onClick={prevImage}
+                zIndex="1"
+                aria-label="Imagen anterior"
               >
                 {"<"}
               </Button>
@@ -67,37 +74,48 @@ const PublicationCard = ({ publication }) => {
                 right="10px"
                 transform="translateY(-50%)"
                 onClick={nextImage}
+                zIndex="1"
+                aria-label="Siguiente imagen"
               >
                 {">"}
               </Button>
             </>
+          ) : (
+            <Box
+              w="100%"
+              h="100%"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              bg="gray.100"
+              borderRadius="md"
+              color="gray.500"
+            >
+              No hay imágenes
+            </Box>
           )}
         </Box>
 
-        {/* Info de la publicación */}
-        <VStack align="start" w="50%" spacing={3}>
-          <Text fontWeight="bold" fontSize="2xl">
-            {title}
-          </Text>
-          <Text fontSize="md" color="gray.700" noOfLines={4}>
-            {description}
-          </Text>
+        <VStack align="start" spacing={3} w="100%">
+          <Text fontWeight="bold" fontSize="2xl">{title}</Text>
+          <Text fontSize="md" color="gray.700" noOfLines={4}>{description}</Text>
 
           <HStack spacing={6} pt={3}>
-            {/* Botón like */}
             <IconButton
-              icon={liked ? <FaHeart color="red" /> : <FaRegHeart />}
+              icon={liked ? <FaHeart /> : <FaRegHeart />}
               aria-label="Like"
-              onClick={() => setLiked(!liked)}
+              onClick={toggleLike}
               variant="ghost"
               size="md"
+              color={liked ? "red.500" : "gray.600"}
             />
-
-            {/* Botón comentarios */}
             <Button
               leftIcon={<FaComment />}
               size="md"
-              onClick={() => alert("Mostrar comentarios")}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+              }}
             >
               Comentarios ({comments.length})
             </Button>
@@ -109,3 +127,4 @@ const PublicationCard = ({ publication }) => {
 };
 
 export default PublicationCard;
+

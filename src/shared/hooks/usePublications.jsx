@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState, useEffect } from "react"; 
 import toast from "react-hot-toast";
-import { getPost } from "../../services/api"; // ajusta ruta si es necesario
+import { getPost } from "../../services/api";
+import { useComment } from "../hooks/useComment"; 
+import { useToast } from "@chakra-ui/react"; 
 
-export const usePublications = () => { // Define el hook custom como función
+export const usePublications = () => { 
   const [publications, setPublications] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState(null);
@@ -35,10 +37,10 @@ export const usePublications = () => { // Define el hook custom como función
     }
   };
 
-  // Optional: fetch publications al montar el componente que usa este hook
+  
   useEffect(() => {
     fetchPublications();
-  }, []); // solo se ejecuta una vez al montar
+  }, []); 
 
   return {
     publications,

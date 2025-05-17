@@ -22,3 +22,16 @@ export const getPost = async () => {
     }
 };
 
+export const PostComment = async (data) => {
+  try {
+    const response = await apiClient.post('/comments/postComments/', data);
+    return response.data;
+  } catch (e) {
+    const msg = e.response?.data?.msg || 'Error al publicar comentario';
+    return {
+      error: true,
+      msg,
+      e,
+    };
+  }
+};
