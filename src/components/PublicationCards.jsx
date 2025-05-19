@@ -7,7 +7,7 @@ import { FaHeart, FaRegHeart, FaComment } from "react-icons/fa";
 const PublicationCard = ({ publication, onClick }) => {
   if (!publication) return null;
 
-  const { _id, title, description, photos = [], comments = [] } = publication;
+  const { _id, title, description, photos = [], comments = [], category, createdAt } = publication;
 
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -29,6 +29,17 @@ const PublicationCard = ({ publication, onClick }) => {
   const toggleLike = (e) => {
     e.stopPropagation();
     setLiked((prev) => !prev);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
   };
 
   return (
@@ -98,6 +109,8 @@ const PublicationCard = ({ publication, onClick }) => {
 
         <VStack align="start" spacing={3} w="100%">
           <Text fontWeight="bold" fontSize="2xl">{title}</Text>
+          <Text fontSize="sm" color="gray.600">Materia: {category}</Text>
+          <Text fontSize="sm" color="gray.600">Publicado el: {formatDate(createdAt)}</Text>
           <Text fontSize="md" color="gray.700" noOfLines={4}>{description}</Text>
 
           <HStack spacing={6} pt={3}>
@@ -127,4 +140,5 @@ const PublicationCard = ({ publication, onClick }) => {
 };
 
 export default PublicationCard;
+
 

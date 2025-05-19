@@ -13,7 +13,18 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart, FaComment } from "react-icons/fa";
-import { useComment } from "../shared/hooks"; // Ajusta la ruta según corresponda
+import { useComment } from "../shared/hooks"; 
+
+const formatDate = (isoString) => {
+  const date = new Date(isoString);
+  return date.toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 const CommentsList = React.memo(({ comments }) => {
   return (
@@ -30,7 +41,14 @@ const CommentsList = React.memo(({ comments }) => {
             boxShadow="sm"
             w="100%"
           >
-            <Text fontWeight="semibold">{comment.author}</Text>
+            <HStack justify="space-between" w="100%">
+              <Text fontWeight="semibold">{comment.author}</Text>
+              {comment.createdAt && (
+                <Text fontSize="xs" color="gray.500">
+                  {formatDate(comment.createdAt)}
+                </Text>
+              )}
+            </HStack>
             <Divider my={1} />
             <Text fontSize="sm">{comment.content}</Text>
           </Box>

@@ -24,22 +24,24 @@ import React from 'react';
 
 const SidebarContent = ({ onLinkClick }) => (
   <VStack spacing={4} align="stretch" mt={4}>
-    <Button variant="ghost" onClick={() => onLinkClick('home')}>Tecnología</Button>
-    <Button variant="ghost" onClick={() => onLinkClick('about')}>Taller</Button>
-    <Button variant="ghost" onClick={() => onLinkClick('contact')}>Práctica Supervisada</Button>
+    <Button variant="ghost" onClick={() => onLinkClick('all')}>Todas</Button> {/* Botón "Todas" */}
+    <Button variant="ghost" onClick={() => onLinkClick('Tecnologia')}>Tecnología</Button>
+    <Button variant="ghost" onClick={() => onLinkClick('Taller')}>Taller</Button>
+    <Button variant="ghost" onClick={() => onLinkClick('Practica_Supervisada')}>Práctica Supervisada</Button>
   </VStack>
 );
 
-const Sidebar = () => {
+const Sidebar = ({ onFilterChange, activeFilter }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleLinkClick = (route) => {
-    console.log(`Navigating to: ${route}`);
-    onClose();
+    onFilterChange(route); // Cambia el filtro
+    onClose(); // Cierra el sidebar
   };
 
   return (
     <>
+      {/* nav principal */}
       <Flex
         as="nav"
         bg="gray.50"
@@ -50,10 +52,7 @@ const Sidebar = () => {
         top={0}
         zIndex={1000}
       >
-        {/* Zona izquierda con avatar y menú */}
         <Flex align="center" gap={3}>
-          
-          {/* Botón del sidebar */}
           <IconButton
             icon={<FaBars />}
             aria-label="Abrir menú lateral"
@@ -61,16 +60,16 @@ const Sidebar = () => {
             onClick={onOpen}
           />
 
-          {/* Menús */}
+          {/* Menús de proyectos */}
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />} variant="ghost">
               Proyectos
             </MenuButton>
             <MenuList>
-              <MenuItem onClick={() => console.log('Product A')}>Almacenadora</MenuItem>
-              <MenuItem onClick={() => console.log('Product B')}>Gestor de Hoteles</MenuItem>
-              <MenuItem onClick={() => console.log('Product C')}>Blog Personal (Backend)</MenuItem>
-              <MenuItem onClick={() => console.log('Product C')}>Blog Personal (Frontend)</MenuItem>
+              <MenuItem onClick={() => console.log('Almacenadora')}>Almacenadora</MenuItem>
+              <MenuItem onClick={() => console.log('Gestor de Hoteles')}>Gestor de Hoteles</MenuItem>
+              <MenuItem onClick={() => console.log('Blog Backend')}>Blog Personal (Backend)</MenuItem>
+              <MenuItem onClick={() => console.log('Blog Frontend')}>Blog Personal (Frontend)</MenuItem>
             </MenuList>
           </Menu>
 
@@ -82,21 +81,14 @@ const Sidebar = () => {
         </Flex>
 
         <Spacer />
-
-        {/* Título centrado */}
         <Box fontWeight="bold" fontSize="lg" color="gray.700" marginRight="1%">
           Luis De León
         </Box>
-
-        
-
-        {/* Avatar circular */}
-          <Avatar
-            size="sm"
-            name="Luis Eduardo"
-            src="https://th.bing.com/th/id/R.d51eaa96b13a2083095b031a736eb121?rik=uUGNMBDeYtxMXQ&riu=http%3a%2f%2f4.bp.blogspot.com%2f-7D2wuu1pwec%2fUeGODZmJtTI%2fAAAAAAAAAEg%2f9X3VvZEPu4I%2fs1600%2fSIMBOLO%2bBIOHAZARD.png&ehk=Z8tXKi%2b6%2bWYDPRtZ6UwSSYX5bAAHHPqJu5eJ3mguZ%2fU%3d&risl=&pid=ImgRaw&r=0&sres=1&sresct=1" // Reemplaza esta URL con tu imagen real
-          />
-
+        <Avatar
+          size="sm"
+          name="Luis Eduardo"
+          src=""
+        />
       </Flex>
 
       {/* Drawer lateral */}
@@ -106,7 +98,10 @@ const Sidebar = () => {
           <DrawerCloseButton />
           <DrawerHeader fontWeight="bold">Navegación</DrawerHeader>
           <DrawerBody>
-            <SidebarContent onLinkClick={handleLinkClick} />
+            <SidebarContent
+              onLinkClick={handleLinkClick}
+              activeFilter={activeFilter}
+            />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
