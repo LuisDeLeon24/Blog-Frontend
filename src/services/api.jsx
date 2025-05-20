@@ -35,3 +35,29 @@ export const PostComment = async (data) => {
     };
   }
 };
+
+export const deleteComment = async (commentId) => {
+  try {
+       return await apiClient.delete(`/comments/${commentId}`)
+ } catch (e) {
+     const msg = e.response?.data?.msg || 'Error desconocido';
+     return {
+         error: true,
+         msg,
+         e,
+     };
+ }
+}
+
+export const updateComment = async ( commentId,data ) => {
+ try{
+   return await apiClient.put(`/comments/${commentId}`,data)
+ }catch(e){
+   const msg = e.response?.data?.msg || 'Error desconocido';
+   return {
+       error: true,
+       msg,
+       e,
+   };  
+ }
+}

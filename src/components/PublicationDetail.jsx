@@ -13,7 +13,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart, FaComment } from "react-icons/fa";
-import { useComment } from "../shared/hooks"; 
+import { useComment } from "../shared/hooks";
 
 const formatDate = (isoString) => {
   const date = new Date(isoString);
@@ -26,33 +26,134 @@ const formatDate = (isoString) => {
   });
 };
 
-const CommentsList = React.memo(({ comments }) => {
+const CommentsList = React.memo(({ comments, onDelete, onEdit }) => {
+  const toast = useToast();
+  const { deleteComment, updateComment } = useComment();
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editedContent, setEditedContent] = useState("");
+
+  const handleDelete = async (commentId) => {
+    const confirmed = window.confirm("¿Seguro que quieres eliminar este comentario?");
+    if (!confirmed) return;
+
+    const res = await deleteComment(commentId);
+    if (res) {
+      toast({
+        title: "Comentario eliminado",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      if (onDelete) onDelete(commentId);
+    } else {
+      toast({
+        title: "Error al eliminar",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleEditSave = async (commentId) => {
+    if (!editedContent.trim()) return;
+
+    const res = await updateComment(commentId, { content: editedContent });
+    if (res) {
+      toast({
+        title: "Comentario actualizado",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setEditingIndex(null);
+      setEditedContent("");
+      if (onEdit) onEdit(res);
+    } else {
+      toast({
+        title: "Error al actualizar",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <VStack align="start" spacing={4}>
       {comments.length === 0 ? (
         <Text color="gray.500">Aún no hay comentarios.</Text>
       ) : (
-        comments.map((comment, index) => (
-          <Box
-            key={comment._id || index}
-            bg="white"
-            p={3}
-            borderRadius="md"
-            boxShadow="sm"
-            w="100%"
-          >
-            <HStack justify="space-between" w="100%">
-              <Text fontWeight="semibold">{comment.author}</Text>
-              {comment.createdAt && (
-                <Text fontSize="xs" color="gray.500">
-                  {formatDate(comment.createdAt)}
-                </Text>
+        comments.map((comment, index) => {
+          const isEditing = editingIndex === index;
+
+          return (
+            <Box
+              key={comment._id || index}
+              bg="white"
+              p={3}
+              borderRadius="md"
+              boxShadow="sm"
+              w="100%"
+            >
+              <HStack justify="space-between" w="100%">
+                <Text fontWeight="semibold">{comment.author}</Text>
+                {comment.updatedAt && (
+                  <Text fontSize="xs" color="gray.500">
+                    {formatDate(comment.updatedAt)}
+                  </Text>
+                )}
+              </HStack>
+              <Divider my={1} />
+
+              {isEditing ? (
+                <VStack spacing={2} align="stretch">
+                  <Input
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                  />
+                  <HStack justify="end">
+                    <Button size="sm" onClick={() => setEditingIndex(null)}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      colorScheme="blue"
+                      size="sm"
+                      onClick={() => handleEditSave(comment._id)}
+                    >
+                      Guardar
+                    </Button>
+                  </HStack>
+                </VStack>
+              ) : (
+                <>
+                  <Text fontSize="sm">{comment.content}</Text>
+                  <HStack justify="end" spacing={2} pt={2}>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      colorScheme="blue"
+                      onClick={() => {
+                        setEditingIndex(index);
+                        setEditedContent(comment.content);
+                      }}
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={() => handleDelete(comment._id)}
+                    >
+                      Eliminar
+                    </Button>
+                  </HStack>
+                </>
               )}
-            </HStack>
-            <Divider my={1} />
-            <Text fontSize="sm">{comment.content}</Text>
-          </Box>
-        ))
+            </Box>
+          );
+        })
       )}
     </VStack>
   );
@@ -61,8 +162,9 @@ const CommentsList = React.memo(({ comments }) => {
 const PublicationDetail = ({ publication }) => {
   if (!publication) return null;
 
-  const { _id, title, description, photos = [], comments = [] } = publication;
+  const { _id, title, description, photos = [], comments: initialComments = [] } = publication;
 
+  const [comments, setComments] = useState(initialComments);
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(false);
   const [showCommentInputs, setShowCommentInputs] = useState(false);
@@ -80,7 +182,7 @@ const PublicationDetail = ({ publication }) => {
   const toggleLike = () => setLiked((prev) => !prev);
 
   const handleCommentSubmit = async () => {
-    if (!author.trim() || !content.trim() || !_id) {
+    if (!content.trim() || !_id) {
       toast({
         title: "Por favor completa todos los campos.",
         status: "warning",
@@ -90,7 +192,9 @@ const PublicationDetail = ({ publication }) => {
       return;
     }
 
-    const res = await postComment({ author, content, publication: _id });
+    const commentAuthor = author.trim() ? author : "Anonymous";
+
+    const res = await postComment({ author: commentAuthor, content, publication: _id });
 
     if (res && !error) {
       setAuthor("");
@@ -102,8 +206,7 @@ const PublicationDetail = ({ publication }) => {
         isClosable: true,
       });
 
-      // Aquí no actualizamos el arreglo local.
-      // Se espera que el padre o el backend actualicen la prop 'publication.comments'.
+      setComments((prev) => [...prev, res.comment || res]);
     } else if (error) {
       toast({
         title: "Error al enviar comentario.",
@@ -113,6 +216,16 @@ const PublicationDetail = ({ publication }) => {
         isClosable: true,
       });
     }
+  };
+
+  const handleDeleteComment = (commentId) => {
+    setComments((prev) => prev.filter((c) => c._id !== commentId));
+  };
+
+  const handleEditComment = (updatedComment) => {
+    setComments((prev) =>
+      prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
+    );
   };
 
   return (
@@ -210,7 +323,11 @@ const PublicationDetail = ({ publication }) => {
         <Text fontSize="lg" fontWeight="bold" mb={3}>
           Comentarios ({comments.length})
         </Text>
-        <CommentsList comments={comments} />
+        <CommentsList
+          comments={comments}
+          onDelete={handleDeleteComment}
+          onEdit={handleEditComment}
+        />
       </Box>
     </Flex>
   );

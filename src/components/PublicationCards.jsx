@@ -7,7 +7,7 @@ import { FaHeart, FaRegHeart, FaComment } from "react-icons/fa";
 const PublicationCard = ({ publication, onClick }) => {
   if (!publication) return null;
 
-  const { _id, title, description, photos = [], comments = [], category, createdAt } = publication;
+  const { _id, title, description, photos = [], comments = [], category, updatedAt } = publication;
 
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -110,7 +110,7 @@ const PublicationCard = ({ publication, onClick }) => {
         <VStack align="start" spacing={3} w="100%">
           <Text fontWeight="bold" fontSize="2xl">{title}</Text>
           <Text fontSize="sm" color="gray.600">Materia: {category}</Text>
-          <Text fontSize="sm" color="gray.600">Publicado el: {formatDate(createdAt)}</Text>
+          <Text fontSize="sm" color="gray.600">Publicado el: {formatDate(updatedAt)}</Text>
           <Text fontSize="md" color="gray.700" noOfLines={4}>{description}</Text>
 
           <HStack spacing={6} pt={3}>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
+import BlogProfileCard from "../components/Profile";
 import PublicationsList from "../components/PublicationList";
 import {
   Grid,
@@ -43,10 +44,8 @@ const LandingPage = () => {
         </GridItem>
 
         <GridItem>
-          <Box bg="green.100" p={4} borderRadius="md">
-            <strong>Columna secundaria (1/3)</strong>
-            <br />
-            Se vienen cositas.
+          <Box  p={4} borderRadius="md">
+            <BlogProfileCard p="5px"/>
           </Box>
         </GridItem>
       </Grid>
